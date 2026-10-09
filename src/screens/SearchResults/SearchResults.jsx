@@ -91,6 +91,7 @@ export default function SearchResults() {
   const [draftFilters, setDraftFilters] = useState(() => createInitialFilters(urlParams))
   const [filters, setFilters] = useState(() => createInitialFilters(urlParams))
   const [result, setResult] = useState(initialResult)
+  const resultItems = Array.isArray(result?.items) ? result.items : []
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiMessages, setAiMessages] = useState([{ role: 'assistant', text: "Tell me what matters most and I'll adjust the results." }])
   const [saved, setSaved] = useState(() => new Set(JSON.parse(localStorage.getItem('guideverse:saved-experiences') || '[]')))
@@ -406,14 +407,14 @@ export default function SearchResults() {
 
             {!loading && !error && viewMode === 'map' ? (
               <div className="map-layout">
-                <div className="results-grid">{result.items.map(item => <SearchCard key={item.id} item={item} saved={saved.has(item.id)} onToggleSaved={toggleSaved} onOpen={() => openExperience(item.slug)} />)}</div>
-                <div className="map-panel"><div className="map-panel__header"><h3>Result locations</h3><span>{result.items.length} pins</span></div><div className="map-placeholder">{result.items.map(item => <button key={item.id} type="button" onClick={() => navigate(`/experience/${item.slug}`)}><span>{item.title}</span><small>{item.location}</small></button>)}</div></div>
+                <div className="results-grid">{resultItems.map(item => <SearchCard key={item.id} item={item} saved={saved.has(item.id)} onToggleSaved={toggleSaved} onOpen={() => openExperience(item.slug)} />)}</div>
+                <div className="map-panel"><div className="map-panel__header"><h3>Result locations</h3><span>{resultItems.length} pins</span></div><div className="map-placeholder">{result.items.map(item => <button key={item.id} type="button" onClick={() => navigate(`/experience/${item.slug}`)}><span>{item.title}</span><small>{item.location}</small></button>)}</div></div>
               </div>
             ) : null}
 
-            {!loading && !error && viewMode !== 'map' && result.items.length ? (
+            {!loading && !error && viewMode !== 'map' && resultItems.length ? (
               <>
-                <div className="results-grid">{result.items.map(item => <SearchCard key={item.id} item={item} saved={saved.has(item.id)} onToggleSaved={toggleSaved} onOpen={() => openExperience(item.slug)} />)}</div>
+                <div className="results-grid">{resultItems.map(item => <SearchCard key={item.id} item={item} saved={saved.has(item.id)} onToggleSaved={toggleSaved} onOpen={() => openExperience(item.slug)} />)}</div>
                 <nav className="pagination">
                   <button className="page-btn" type="button" disabled={page === 1} onClick={() => setPage(current => Math.max(1, current - 1))}><ChevronLeft size={14} /></button>
                   <span className="page-info">Page {page} of {pageCount}</span>
@@ -422,7 +423,7 @@ export default function SearchResults() {
               </>
             ) : null}
 
-            {!loading && !error && !result.items.length ? (
+            {!loading && !error && !resultItems.length? (
               <div className="empty-state">
                 <Search size={28} />
                 <h3>No experiences match these filters</h3>

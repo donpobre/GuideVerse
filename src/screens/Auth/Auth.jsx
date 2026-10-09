@@ -254,11 +254,11 @@ export default function Auth() {
 
           {/* Social */}
           <div className="auth-social">
-            <button className="auth-social-btn" onClick={() => handleSocial('google')} disabled={Boolean(socialLoading) || !socialProviders.google.configured} aria-label="Continue with Google">
+            <button className="auth-social-btn" onClick={() => handleSocial('google')} disabled={Boolean(socialLoading) || !socialProviders.google?.configured} aria-label="Continue with Google">
               {socialLoading === 'google' ? <span className="auth-spinner dark" /> : <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" width="18" height="18" />}
               Google
             </button>
-            <button className="auth-social-btn" onClick={() => handleSocial('facebook')} disabled={Boolean(socialLoading) || !socialProviders.facebook.configured} aria-label="Continue with Facebook">
+            <button className="auth-social-btn" onClick={() => handleSocial('facebook')} disabled={Boolean(socialLoading) || !socialProviders.facebook?.configured} aria-label="Continue with Facebook">
               {socialLoading === 'facebook' ? <span className="auth-spinner dark" /> : <span style={{ color: '#1877f2', fontWeight: 800, fontSize: 20 }}>f</span>}
               Facebook
             </button>
