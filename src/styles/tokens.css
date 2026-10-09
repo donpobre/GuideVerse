@@ -1,0 +1,150 @@
+/* ============================================================
+   DESIGN TOKENS – GuideVerse
+   Apple HIG + Material Design 3 · premium travel palette
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Platypi:ital,wght@0,300..800;1,300..800&display=swap');
+
+:root {
+  /* ── GuideVerse Brand (from Screen Spec) ── */
+  --color-primary: #142B52;
+  /* deep sapphire */
+  --color-primary-light: #1E3D6E;
+  --color-primary-dark: #0F1B2E;
+  --color-on-primary: #FFFFFF;
+
+  --color-accent: #C9A227;
+  /* brass gold */
+  --color-accent-dark: #A8861E;
+  --color-on-accent: #1B1B1B;
+
+  --color-secondary: #1E6B4F;
+  /* success green accent */
+  --color-secondary-light: #258563;
+  --color-on-secondary: #FFFFFF;
+
+  --color-bg: #F7F5F0;
+  /* warm ivory */
+  --color-background: #F7F5F0;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #EFEBE3;
+  --color-surface-overlay: rgba(20, 43, 82, 0.06);
+  --color-on-background: #0A1220;
+  --color-on-surface: #142B52;
+  --color-on-surface-sub: #4A5568;
+  --color-on-surface-muted: #718096;
+
+  /* ── Semantic ── */
+  --color-error: #B3261E;
+  --color-error-bg: #FEF2F2;
+  --color-success: #1E6B4F;
+  --color-success-bg: #ECFDF5;
+  --color-warning: #C9A227;
+  --color-warning-bg: #FFFBEB;
+  --color-info: #142B52;
+  --color-info-bg: #EFF6FF;
+
+  /* ── Border ── */
+  --color-border: #E2DDD4;
+  --color-border-focus: #C9A227;
+  --color-border-error: #B3261E;
+
+  /* ── Elevation ── */
+  --elevation-1: 0 1px 3px rgba(20, 43, 82, 0.08), 0 1px 2px rgba(20, 43, 82, 0.06);
+  --elevation-2: 0 4px 12px rgba(20, 43, 82, 0.12), 0 2px 4px rgba(20, 43, 82, 0.06);
+  --shadow-xs: var(--elevation-1);
+  --shadow-sm: var(--elevation-1);
+  --shadow-md: var(--elevation-2);
+  --shadow-lg: 0 10px 24px rgba(20, 43, 82, 0.14);
+  --shadow-xl: 0 20px 40px rgba(20, 43, 82, 0.18);
+  --shadow-2xl: 0 25px 50px rgba(20, 43, 82, 0.25);
+  --shadow-primary: 0 4px 14px rgba(20, 43, 82, 0.30);
+  --shadow-accent: 0 4px 14px rgba(201, 162, 39, 0.35);
+
+  /* ── Spacing (spec rhythm) ── */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border Radius ── */
+  --radius-card: 16px;
+  --radius-control: 12px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* ── Typography ── */
+  --font-display: "Platypi", -apple-system, system-ui, Helvetica, Arial, sans-serif;
+  --font-body: "Poppins", -apple-system, system-ui, Helvetica, Arial, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  --leading-tight: 1.15;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.75;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.12em;
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 250ms ease-out;
+  --transition-slow: 400ms ease-out;
+
+  /* ── Z-Index ── */
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* ── Layout ── */
+  --max-width-xl: 1280px;
+  --navbar-height: 68px;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0A1220;
+  --color-background: #0A1220;
+  --color-surface: #0F1B2E;
+  --color-surface-raised: #142B52;
+  --color-on-background: #F7F5F0;
+  --color-on-surface: #F7F5F0;
+  --color-on-surface-sub: #A0AEC0;
+  --color-on-surface-muted: #718096;
+  --color-border: #1E3D6E;
+  --color-primary: #2A4A7A;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.40);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,5 @@
+ src/screens/Home/Home.jsx                          | 34 [32m++++++++++++++++[m[31m------[m
+ src/screens/SearchResults/SearchResults.css        |  8 [32m+++++[m
+ src/screens/SearchResults/SearchResults.jsx        | 18 [32m++++++++++++[m
+ .../traveler/CustomRequests/CustomRequests.jsx     | 11 [32m+++++[m[31m--[m
+ 4 files changed, 60 insertions(+), 11 deletions(-)

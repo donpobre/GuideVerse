@@ -1,0 +1,10 @@
+{
+  "name": "GuideVerse",
+  "short_name": "GuideVerse",
+  "description": "Discover and book trusted local experiences.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F4EB",
+  "theme_color": "#142B52",
+  "orientation": "portrait-primary"
+}

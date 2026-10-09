@@ -1,0 +1,64 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AlertTriangle, Camera, Check, ChevronRight, CreditCard, LogOut, Plus, ShieldCheck, Trash2, UserRound } from 'lucide-react'
+import TravelerTabs from '../../../components/TravelerTabs/TravelerTabs'
+import { clearAuthSession } from '../../../services/authSession'
+import { beginPaymentMethodSetup, completePayPalSetup, createEmergencyContact, deleteEmergencyContact, deletePaymentMethod, getPaymentProviderStatus, getTravelerSettings, updateAccountStatus, updateNotificationPreferences, updateTravelerProfile } from '../../../services/travelerSettingsService'
+
+const sections = ['Personal', 'Payment', 'Notifications', 'Safety', 'Account']
+const Toggle = ({ checked, onChange, label, detail }) => <label className="settings-toggle-row"><span><strong>{label}</strong><small>{detail}</small></span><input className="settings-toggle" type="checkbox" checked={checked} onChange={onChange} /></label>
+
+export default function TravelerSettings() {
+  const navigate = useNavigate()
+  const [section, setSection] = useState('Personal')
+  const [data, setData] = useState(null)
+  const [providers, setProviders] = useState(null)
+  const [draft, setDraft] = useState({ name: '', email: '', phone: '', avatar_url: '' })
+  const [editing, setEditing] = useState(false)
+  const [contact, setContact] = useState({ name: '', phone: '' })
+  const [adding, setAdding] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const load = () => {
+    setError('')
+    Promise.all([getTravelerSettings(), getPaymentProviderStatus()]).then(([value, status]) => {
+      setData(value); setProviders(status)
+      setDraft({ name: `${value.profile.first_name} ${value.profile.last_name}`.trim(), email: value.profile.email, phone: value.profile.phone || '', avatar_url: value.profile.avatar_url || '' })
+    }).catch(e => setError(e.message))
+  }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('approval_token') || params.get('token')
+    if (params.get('payment') === 'paypal-return' && token) {
+      setSection('Payment'); completePayPalSetup(token).then(() => { window.history.replaceState({}, '', window.location.pathname); load() }).catch(e => setError(e.message))
+    } else { if (params.has('payment')) setSection('Payment'); load() }
+  }, [])
+
+  const notice = text => { setMessage(text); setTimeout(() => setMessage(''), 2800) }
+  const connectPayment = async provider => { setBusy(true); setError(''); try { const result = await beginPaymentMethodSetup(provider); window.location.assign(result.redirect_url) } catch (e) { setError(e.message); setBusy(false) } }
+  const removePayment = async id => { setBusy(true); try { await deletePaymentMethod(id); setData(v => ({ ...v, payment_methods: v.payment_methods.filter(x => x.id !== id) })); notice('Payment method removed') } catch (e) { setError(e.message) } finally { setBusy(false) } }
+  const chooseAvatar = e => { const file = e.target.files?.[0]; if (!file) return; if (!file.type.startsWith('image/')) { setError('Choose a JPG, PNG, WebP, or GIF image.'); return } if (file.size > 2 * 1024 * 1024) { setError('Profile photo must be smaller than 2 MB.'); return } const reader = new FileReader(); reader.onload = () => { setDraft(v => ({ ...v, avatar_url: reader.result })); setError('') }; reader.readAsDataURL(file) }
+  const saveProfile = async e => { e.preventDefault(); setBusy(true); try { const profile = await updateTravelerProfile(draft); setData(v => ({ ...v, profile })); const storedUser = JSON.parse(localStorage.getItem('tgm_user') || 'null'); if (storedUser) { localStorage.setItem('tgm_user', JSON.stringify({ ...storedUser, first_name: profile.first_name, last_name: profile.last_name, avatar_url: profile.avatar_url })); window.dispatchEvent(new Event('tgm-auth-changed')) } setEditing(false); notice('Personal information saved') } catch (e) { setError(e.message) } finally { setBusy(false) } }
+  const saveNotifications = async () => { setBusy(true); try { const notifications = await updateNotificationPreferences(data.notifications); setData(v => ({ ...v, notifications })); notice('Notification preferences saved') } catch (e) { setError(e.message) } finally { setBusy(false) } }
+  const addContact = async e => { e.preventDefault(); setBusy(true); try { const saved = await createEmergencyContact(contact); setData(v => ({ ...v, contacts: [...v.contacts, saved] })); setContact({ name: '', phone: '' }); setAdding(false); notice('Emergency contact added') } catch (e) { setError(e.message) } finally { setBusy(false) } }
+  const removeContact = async id => { try { await deleteEmergencyContact(id); setData(v => ({ ...v, contacts: v.contacts.filter(x => x.id !== id) })); notice('Emergency contact removed') } catch (e) { setError(e.message) } }
+  const deactivate = async () => { try { const result = await updateAccountStatus('deactivated'); setData(v => ({ ...v, profile: { ...v.profile, ...result } })); notice('Account deactivated') } catch (e) { setError(e.message) } }
+  const logout = () => { clearAuthSession(); navigate('/auth', { replace: true }) }
+
+  if (!data) return <main className="portal-page settings-page"><div className="settings-shell">{error ? <div className="inline-banner">{error}</div> : 'Loading your settings…'}</div></main>
+  const profile = data.profile
+  return <main className="portal-page settings-page"><div className="settings-shell">
+    <aside className="settings-sidebar">{sections.map(x => <button key={x} className={section === x ? 'active' : ''} onClick={() => setSection(x)}>{x}<ChevronRight size={16} /></button>)}</aside>
+    <div className="settings-content">
+      <header className="settings-profile-header portal-card"><div className="settings-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt={`${profile.first_name} ${profile.last_name}`} /> : <UserRound size={34} />}</div><div className="settings-profile-copy"><p>Traveler profile</p><h1>{profile.first_name} {profile.last_name}</h1><span>{profile.email}</span></div><button className="btn btn-outline btn-sm" onClick={() => { setSection('Personal'); setEditing(true) }}>Edit Profile</button></header>
+      {error && <div className="inline-banner">{error}</div>}
+      <div className="settings-mobile-nav">{sections.map(x => <button key={x} className={section === x ? 'active' : ''} onClick={() => setSection(x)}>{x}</button>)}</div>
+      {section === 'Personal' && <section className="portal-card settings-section"><div className="settings-section-heading"><div><p className="settings-eyebrow">Personal info</p><h2>Your details</h2></div>{!editing && <button className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>Edit</button>}</div>{editing ? <form className="settings-form" onSubmit={saveProfile}><div className="settings-avatar-editor"><div className="settings-avatar settings-avatar-preview">{draft.avatar_url ? <img src={draft.avatar_url} alt="Profile preview" /> : <UserRound size={34} />}</div><div><label className="btn btn-outline btn-sm settings-avatar-upload"><Camera size={16} /> Choose photo<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={chooseAvatar} /></label><small>JPG, PNG, WebP or GIF. Maximum 2 MB.</small>{draft.avatar_url && <button type="button" className="settings-remove-photo" onClick={() => setDraft(v => ({ ...v, avatar_url: '' }))}>Remove photo</button>}</div></div>{[['Full name', 'name'], ['Email address', 'email'], ['Phone number', 'phone']].map(([label, key]) => <label className="input-group" key={key}><span className="input-label">{label}</span><input className="input-field" type={key === 'email' ? 'email' : 'text'} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} required={key !== 'phone'} /></label>)}<div className="settings-actions"><button type="button" className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button><button className="btn btn-primary" disabled={busy}>Save changes</button></div></form> : <dl className="settings-details"><div><dt>Full name</dt><dd>{profile.first_name} {profile.last_name}</dd></div><div><dt>Email address</dt><dd>{profile.email}</dd></div><div><dt>Phone number</dt><dd>{profile.phone || 'Not added'}</dd></div></dl>}</section>}
+      {section === 'Payment' && <section className="portal-card settings-section"><div className="settings-section-heading"><div><p className="settings-eyebrow">Payment methods</p><h2>Cards and payment</h2><span>Payment details are collected and secured by Stripe or PayPal.</span></div><CreditCard size={26} /></div>{data.payment_methods.length > 0 && <div className="settings-list">{data.payment_methods.map(x => <div className="settings-payment" key={x.id}><CreditCard /><div><strong>{x.display_label || (x.last4 ? `${x.brand} ending in ${x.last4}` : x.brand)}</strong><small>{x.provider === 'stripe' && x.expiry_month ? `Expires ${x.expiry_month}/${x.expiry_year}` : `Connected with ${x.provider}`}</small></div><button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => removePayment(x.id)}><Trash2 size={15} /> Remove</button></div>)}</div>}<div className="settings-payment-actions"><div><strong>Stripe</strong><p>Securely save a credit or debit card.</p><button className="btn btn-primary" disabled={busy || !providers?.stripe.configured} onClick={() => connectPayment('stripe')}>Add card with Stripe</button>{!providers?.stripe.configured && <small>Add Stripe sandbox keys to enable.</small>}</div><div><strong>PayPal</strong><p>Link a PayPal wallet for future checkout.</p><button className="btn btn-outline" disabled={busy || !providers?.paypal.configured} onClick={() => connectPayment('paypal')}>Connect PayPal</button>{!providers?.paypal.configured && <small>Add PayPal sandbox keys to enable.</small>}</div></div></section>}
+      {section === 'Notifications' && <section className="portal-card settings-section"><div className="settings-section-heading"><div><p className="settings-eyebrow">Notifications</p><h2>Stay in the loop</h2></div></div>{[['booking', 'Booking updates'], ['messages', 'Messages'], ['safety', 'Safety alerts'], ['promotions', 'Promotions']].map(([key, label]) => <Toggle key={key} label={label} detail="Manage this notification type" checked={data.notifications[key]} onChange={() => setData(v => ({ ...v, notifications: { ...v.notifications, [key]: !v.notifications[key] } }))} />)}<div className="settings-actions"><button className="btn btn-primary" onClick={saveNotifications} disabled={busy}>Save preferences</button></div></section>}
+      {section === 'Safety' && <section className="portal-card settings-section"><div className="settings-section-heading"><div><p className="settings-eyebrow">Safety</p><h2>Emergency contacts</h2></div><ShieldCheck size={26} /></div><div className="settings-list">{data.contacts.map(x => <div className="settings-contact" key={x.id}><div><strong>{x.name}</strong><small>{x.phone}</small></div><button className="btn btn-ghost btn-sm" onClick={() => removeContact(x.id)}>Remove</button></div>)}</div>{adding ? <form className="settings-form" onSubmit={addContact}><input className="input-field" placeholder="Name" value={contact.name} onChange={e => setContact({ ...contact, name: e.target.value })} required /><input className="input-field" placeholder="Phone" value={contact.phone} onChange={e => setContact({ ...contact, phone: e.target.value })} required /><button className="btn btn-primary" disabled={busy}>Save contact</button></form> : <button className="btn btn-outline" onClick={() => setAdding(true)}><Plus size={16} /> Add emergency contact</button>}</section>}
+      {section === 'Account' && <section className="portal-card settings-section"><p className="settings-eyebrow">Account</p><h2>Manage your account</h2><div className="settings-account-row"><div><strong>Log out</strong><p>Sign out of GuideVerse on this device.</p></div><button className="btn btn-outline btn-sm" onClick={logout}><LogOut size={16} /> Log out</button></div><div className="settings-account-row"><div><strong>Deactivate account</strong><p>Status: {profile.account_status}</p></div><button className="btn btn-outline btn-sm" onClick={deactivate} disabled={profile.account_status === 'deactivated'}>Deactivate</button></div><div className="settings-danger-zone"><AlertTriangle /><div><strong>Delete account</strong><p>Account deletion is intentionally unavailable until booking cancellation rules are implemented.</p></div></div></section>}
+    </div></div>{message && <div className="toast-container"><div className="toast success"><Check size={18} />{message}</div></div>}<TravelerTabs /></main>
+}

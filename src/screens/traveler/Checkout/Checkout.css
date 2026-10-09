@@ -1,0 +1,230 @@
+/* ── Checkout step indicator ─────────────────────────────── */
+.checkout-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 0 28px;
+  padding: 0;
+  grid-column: 1 / -1;
+}
+
+/* Back button inside step bar */
+.checkout-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 7px 14px;
+  border: 1px solid var(--color-border, #E3E0D6);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.85);
+  color: var(--color-primary, #142B52);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.checkout-back-btn:hover {
+  background: var(--color-surface-raised, #F7F5F0);
+  border-color: var(--color-accent, #C9A227);
+}
+.checkout-back-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.checkout-page-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-primary, #142B52);
+  font-family: var(--font-display, "Playfair Display", serif);
+}
+
+.checkout-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted, #8A93A2);
+  white-space: nowrap;
+}
+
+.checkout-step__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--surface-elevated, #E7ECF4);
+  color: var(--text-muted, #8A93A2);
+  border: 2px solid transparent;
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+.checkout-step.done .checkout-step__dot {
+  background: #1E6B4F;
+  color: #fff;
+  border-color: #1E6B4F;
+}
+.checkout-step.done .checkout-step__dot svg {
+  stroke: #fff;
+  stroke-width: 2.4;
+  fill: none;
+}
+.checkout-step.done {
+  color: #1E6B4F;
+}
+
+.checkout-step.active .checkout-step__dot {
+  background: #142B52;
+  color: #fff;
+  border-color: #C9A227;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, .25);
+}
+.checkout-step.active {
+  color: #142B52;
+}
+
+.checkout-step__line {
+  width: 36px;
+  height: 2px;
+  background: var(--border-default, #E3E0D6);
+  margin: 0 6px;
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+.checkout-step.done + .checkout-step .checkout-step__line,
+.checkout-step.done .checkout-step__line {
+  background: #1E6B4F;
+}
+
+/* ── Cancellation policy checkbox ──────────────────────── */
+.checkout-policy-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 16px 0 12px;
+  background: var(--surface-elevated, #F7F5F0);
+  border: 1px solid var(--border-default, #E3E0D6);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.checkout-policy-check:hover {
+  border-color: #C9A227;
+}
+
+.checkout-policy-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #142B52;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.checkout-policy-check span {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary, #5B6472);
+}
+
+/* ── Recovery actions (failed state) ───────────────────── */
+.checkout-recovery {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.checkout-recovery .btn {
+  font-size: 14px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #8A93A2);
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.btn-ghost:hover {
+  color: var(--text-primary, #16202E);
+  background: rgba(0, 0, 0, .04);
+}
+
+/* ── Processing note ───────────────────────────────────── */
+.checkout-processing-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--text-muted, #8A93A2);
+  margin-top: 10px;
+}
+.checkout-processing-note svg {
+  flex-shrink: 0;
+}
+
+/* ── PayPal sandbox helper (dev only) ──────────────────── */
+.paypal-sandbox-help {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(201, 162, 39, .08);
+  border: 1px dashed rgba(201, 162, 39, .35);
+  border-radius: 8px;
+  font-size: 11.5px;
+  color: var(--text-muted, #8A93A2);
+}
+.paypal-sandbox-help a {
+  color: #C9A227;
+  font-weight: 700;
+  text-decoration: none;
+}
+.paypal-sandbox-help a:hover {
+  text-decoration: underline;
+}
+
+/* ── Inline banner variants ────────────────────────────── */
+.inline-banner.success {
+  background: #E9F5EE;
+  border-color: #1E6B4F;
+  color: #1E6B4F;
+}
+.inline-banner.success svg {
+  color: #1E6B4F;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .checkout-steps {
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .checkout-step__line {
+    width: 20px;
+    margin: 0 3px;
+  }
+  .checkout-step span {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,87 @@
+# =============================================================================
+# GuideVerse — Render Blueprint
+# Place this file at the ROOT of your repo (same level as package.json).
+#
+# Layout assumed (matches your HuggingFace guide):
+#   /                -> Vite + React frontend  (npm run build -> dist/)
+#   /backend         -> FastAPI app            (app.main:app, alembic, requirements.txt)
+#
+# The Postgres database is created MANUALLY first (see RENDER_DEPLOYMENT.md,
+# Step 2) because PostGIS + pgvector must be enabled before the first
+# migration runs. That is why there is no `databases:` block here.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Backend API — FastAPI
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: guideverse-api
+    runtime: python
+    region: singapore            # must match the region of your Postgres instance
+    plan: free                   # free spins down after ~15 min idle; use a paid plan for demos/judging
+    rootDir: backend
+    # Free plans can't use preDeployCommand, so migrations run at the end of the build.
+    buildCommand: pip install -r requirements.txt && python -m alembic upgrade head
+    # Render injects $PORT (default 10000). Always bind 0.0.0.0:$PORT.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # healthCheckPath: /health   # add the /health endpoint first (see guide), then uncomment
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: APP_ENV
+        value: production
+      # Internal Database URL from Render, with the scheme changed to postgresql+asyncpg://
+      - key: DATABASE_URL
+        sync: false
+      # JWT signing secret. Rename the key if your settings.py uses a different name.
+      - key: SECRET_KEY
+        generateValue: true
+      # URLs below assume the default service names. If Render appends a suffix
+      # (name already taken), update these three plus VITE_API_URL and redeploy.
+      - key: ALLOWED_ORIGINS
+        value: https://guideverse-web.onrender.com
+      - key: FRONTEND_URL
+        value: https://guideverse-web.onrender.com
+      - key: BACKEND_URL
+        value: https://guideverse-api.onrender.com
+      # Secrets — you'll be prompted for these when you create the Blueprint.
+      # Enter a placeholder for any integration you aren't using yet.
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+
+  # ---------------------------------------------------------------------------
+  # Frontend — Vite static site (free, CDN-served, never sleeps)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: guideverse-web
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      # Vite bakes this in at BUILD time. Change it -> you must redeploy the site.
+      - key: VITE_API_URL
+        value: https://guideverse-api.onrender.com
+    # SPA fallback: refreshing /experience/1 or /provider/maria must serve index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
